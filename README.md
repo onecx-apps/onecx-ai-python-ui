@@ -1,5 +1,5 @@
-# onecx-chat-ui
-OneCx chat Management UI
+# onecx-ai-ui
+OneCx ai management UI
 
 Frontend runs with streamlit.
 
