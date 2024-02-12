@@ -2,6 +2,14 @@
 This file contains functions for generating Markdown content from various data.
 """
 import json
+from enum import Enum
+
+
+class Status(Enum):
+    WARNING = "warning"
+    INFO = "info"
+    SUCCESS = "success"
+    ERROR = "error"
 
 
 def markdown_link(text, url) -> str:
@@ -64,29 +72,30 @@ def markdown_row_grid(data) -> str:
     return grid
 
 
-def convert_json_to_markdown_list(response_str: str) -> list:
+def convert_json_to_markdown_list(response_str: str) -> (list, Status):
     """
     Converts a JSON response to a Markdown list of solutions.
     Args:
         response_str (str): The JSON response string.
     Returns:
-        list: A list of Markdown formatted solutions.
+        list: a list of solutions formatted as Markdown strings.
+        Status: status of the response, either SUCCESS, WARNING, INFO, or ERROR.
     """
     # convert response to dict
     try:
         response_dict = json.loads(response_str)
         # return general answer if no solution found
-        if not response_dict["solutions"]:
-            return [response_dict["general_answer"]]
+        if response_dict["status"] in [Status.WARNING, Status.INFO]:
+            return [response_dict["general_answer"]], Status(response_dict["status"])
     except ValueError:
-        return [response_str]
+        return [response_str], Status.ERROR
     # loading markdown template
     try:
         with open("./resources/troubleshooting_template.md", 'r') as file:
             markdown_template = file.read()
     except FileNotFoundError as e:
         print(f"File not found: {e}")
-        return [response_str]
+        return [response_str], Status.ERROR
 
     solution_list = [response_dict["general_answer"]]
     for index, solution in enumerate(response_dict["solutions"]):
@@ -100,4 +109,4 @@ def convert_json_to_markdown_list(response_str: str) -> list:
             url=url_markdown, images=images_markdown)
         solution_list.append(solution_markdown)
 
-    return solution_list
+    return solution_list, Status(response_dict["status"])
