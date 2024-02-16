@@ -25,6 +25,11 @@ logger.info("Starting Application.")
 st.set_page_config(page_title="Chatbot",
                    page_icon="./resources/favicon.ico", layout="wide")
 
+# Create toggle with left-align for "use_llm" parameter
+_, toggle_col = st.columns([15, 1])
+with toggle_col:
+    llm_toggle = st.toggle('Use LLM')
+
 # Create title
 st.title("💬 OneCX Chatbot")
 
@@ -52,19 +57,19 @@ def get_conversation_id(conv_type = "Q_AND_A", return_sys_message = False):
 def send_chat(message):
     try:
         conversation_id = get_conversation_id()
-        
+
         body = {
-                "chat_message": {
-                    "conversationId": conversation_id,
-                    "correlationId": "StreamlitUI",
-                    "message": message,
-                    "type": "user",
-                    "creationDate": 0
-                }
+            "conversationId": conversation_id,
+            "correlationId": "StreamlitUI",
+            "message": message,
+            "type": "user",
+            "creationDate": 0
         }
 
-        response = requests.post(url=f"http://{CHAT_URL}:{CHAT_PORT}/chat",
-                                 json=body)
+        params = {'use_llm': llm_toggle}
+        chat_url = f"http://{CHAT_URL}:{CHAT_PORT}/chat"
+        response = requests.post(url=chat_url,
+                                 json=body, params=params)
         response.raise_for_status()
         response_json = response.json()
 
