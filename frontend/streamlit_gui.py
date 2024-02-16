@@ -7,7 +7,6 @@ import dotenv
 
 import utility.markdown_utility as md
 import utility.frontend_utility as ui
-from frontend.utility.markdown_utility import Status
 
 dotenv.load_dotenv()
 
@@ -53,7 +52,7 @@ def get_conversation_id(conv_type = "Q_AND_A", return_sys_message = False):
 def send_chat(message):
     try:
         conversation_id = get_conversation_id()
-
+        
         body = {
                 "chat_message": {
                     "conversationId": conversation_id,
@@ -68,14 +67,10 @@ def send_chat(message):
                                  json=body)
         response.raise_for_status()
         response_json = response.json()
-        responses, response_status = md.convert_json_to_markdown_list(
-            response_json["message"])
 
-        return {"success_flag": True, "response_status": response_status,
-                "responses": responses}
+        return True, md.convert_json_to_markdown_list(response_json["message"])
     except Exception as e:
-        return {"success_flag": False, "response_status": Status.ERROR,
-                "responses": e}
+        return False, e
 
 
 if "messages" not in st.session_state:
@@ -98,7 +93,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
         with st.spinner("Tippe..."):
             # send request
-            markdown_response = send_chat(prompt)
-            ui.display_response(is_successful=markdown_response["success_flag"],
-                                response_status=markdown_response["response_status"],
-                                responses=markdown_response["responses"])
+            http_success, response_list = send_chat(prompt)
+            ui.display_response(success_flag=http_success,
+                                responses=response_list)

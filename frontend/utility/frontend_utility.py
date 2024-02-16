@@ -4,30 +4,21 @@ This file contains functions for building and updating interface elements.
 import streamlit as st
 from PIL import Image
 
-from frontend.utility.markdown_utility import Status
-
 RESOURCES_DIR = "./resources/"
 
 
-def display_response(is_successful: bool, response_status: Status, responses: list):
+def display_response(success_flag: bool, responses: list):
     """
     Displays the given responses based on success flag.
     Args:
-        is_successful: indicating whether the response is a success or error.
+        success_flag: indicating whether the response is a success or error.
         responses: A list of strings containing the markdown responses to display.
-        response_status: status of the response, either SUCCESS, WARNING, INFO, or ERROR.
     """
     placeholder = st.empty()
-    if is_successful and response_status != Status.ERROR:
+    if success_flag:
         # Join responses with line breaks
         markdown_response = "\n<br>".join(responses)
-        match response_status.name:
-            case Status.SUCCESS.name:
-                placeholder.markdown(markdown_response, unsafe_allow_html=True)
-            case Status.WARNING.name:
-                placeholder.warning(markdown_response, icon="⚠️")
-            case Status.INFO.name:
-                placeholder.info(markdown_response, icon="ℹ️")
+        placeholder.markdown(markdown_response, unsafe_allow_html=True)
         st.session_state.messages.append(
             {"role": "assistant", "content": "\n".join(responses)})
     else:
