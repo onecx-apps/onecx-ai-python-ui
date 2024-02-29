@@ -28,7 +28,7 @@ st.set_page_config(page_title="Chatbot",
 # Create toggle with left-align for "use_llm" parameter
 _, toggle_col = st.columns([15, 1])
 with toggle_col:
-    llm_toggle = st.toggle('Use LLM')
+    llm_toggle = st.toggle('Use LLM', value=True)
 
 # Create title
 st.title("💬 OneCX Chatbot")
